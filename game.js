@@ -2,19 +2,29 @@ const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-const numberEl = document.getElementById("number");
-const statusEl = document.getElementById("status");
+const promptEl = document.getElementById("prompt");
+const startBtn = document.getElementById("startBtn");
 
+let round = 0;
+let target = 0;
+let simonSays = true;
+let roundStart = 0;
+let holdStart = null;
+
+let responseTime = 2000;
+const holdTime = 600;
+let gameActive = false;
+
+// Resize canvas
 function resize() {
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
 }
 
-// Count fingers using landmarks
+// Count fingers
 function countFingers(lm) {
   let count = 0;
 
-  // Index, middle, ring, pinky
   const fingers = [
     [8, 6],
     [12, 10],
@@ -26,10 +36,65 @@ function countFingers(lm) {
     if (lm[tip].y < lm[joint].y) count++;
   }
 
-  // Thumb (x direction)
+  // thumb
   if (lm[4].x > lm[3].x) count++;
 
   return count;
+}
+
+// Start round
+function startRound() {
+  round++;
+  target = Math.floor(Math.random() * 6);
+  simonSays = Math.random() < 0.65;
+
+  roundStart = Date.now();
+  holdStart = null;
+  gameActive = true;
+
+  promptEl.textContent = simonSays
+    ? `Simon says show ${target}`
+    : `Show ${target}`;
+}
+
+// End game
+function endGame(reason) {
+  gameActive = false;
+  promptEl.textContent = `Game Over (${reason}) | Round ${round}`;
+}
+
+// Next round
+function nextRound() {
+  gameActive = false;
+  responseTime = Math.max(800, responseTime - 100);
+  promptEl.textContent = "Correct!";
+  setTimeout(startRound, 800);
+}
+
+// Check input
+function checkInput(fingers) {
+  if (!gameActive) return;
+
+  const now = Date.now();
+
+  if (!simonSays) {
+    if (fingers === target) {
+      endGame("Simon didn't say");
+    }
+    return;
+  }
+
+  if (fingers === target) {
+    if (!holdStart) holdStart = now;
+    if (now - holdStart >= holdTime) {
+      nextRound();
+    }
+  } else {
+    holdStart = null;
+    if (now - roundStart > responseTime) {
+      endGame("Too slow");
+    }
+  }
 }
 
 // MediaPipe Hands
@@ -52,23 +117,17 @@ hands.onResults((results) => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
-  if (!results.multiHandLandmarks.length) {
-    numberEl.textContent = "–";
-    statusEl.textContent = "Show your hand";
-    return;
-  }
+  if (!results.multiHandLandmarks.length) return;
 
   const lm = results.multiHandLandmarks[0];
-
   drawConnectors(ctx, lm, HAND_CONNECTIONS, { lineWidth: 3 });
   drawLandmarks(ctx, lm, { radius: 4 });
 
-  const fingersUp = countFingers(lm);
-  numberEl.textContent = fingersUp;
-  statusEl.textContent = "Fingers detected";
+  const fingers = countFingers(lm);
+  checkInput(fingers);
 });
 
-// Start camera
+// Camera
 const camera = new Camera(video, {
   onFrame: async () => {
     await hands.send({ image: video });
@@ -78,3 +137,10 @@ const camera = new Camera(video, {
 });
 
 camera.start();
+
+// Start button
+startBtn.onclick = () => {
+  round = 0;
+  responseTime = 2000;
+  startRound();
+};
