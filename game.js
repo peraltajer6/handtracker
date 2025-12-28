@@ -80,13 +80,20 @@ function checkInput(fingers) {
 
   const now = Date.now();
 
-  // Grace period so player can move hand
+  // Grace period
   if (now - roundStart < graceTime) return;
 
   // Simon did NOT say
   if (!simonSays) {
+    // If player messes up
     if (fingers === target) {
       endGame("Simon didn't say");
+      return;
+    }
+
+    // If player survives long enough → next round
+    if (now - roundStart > graceTime + responseTime) {
+      nextRound();
     }
     return;
   }
@@ -99,7 +106,7 @@ function checkInput(fingers) {
     }
   } else {
     holdStart = null;
-    if (now - roundStart > responseTime + graceTime) {
+    if (now - roundStart > graceTime + responseTime) {
       endGame("Too slow");
     }
   }
