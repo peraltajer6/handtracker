@@ -7,7 +7,21 @@ body {
 }
 
 h1 {
-  margin: 12px 0;
+  margin: 10px 0;
+}
+
+#prompt {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
 }
 
 .stage {
@@ -15,7 +29,7 @@ h1 {
   width: 90vw;
   max-width: 800px;
   aspect-ratio: 16 / 9;
-  margin: auto;
+  margin: 10px auto;
   background: black;
   border-radius: 16px;
   overflow: hidden;
@@ -35,27 +49,4 @@ video {
 canvas {
   pointer-events: none;
   transform: scaleX(-1);
-}
-
-.overlay {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  pointer-events: none;
-}
-
-#number {
-  font-size: 120px;
-  font-weight: 900;
-  text-shadow: 0 0 20px rgba(255,255,255,.6);
-}
-
-#status {
-  position: absolute;
-  bottom: 12px;
-  background: rgba(0,0,0,.6);
-  padding: 8px 14px;
-  border-radius: 12px;
-  font-size: 14px;
 }
