@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <title>Finger Simon Says</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Finger Counter</title>
 
   <link rel="stylesheet" href="style.css">
 
@@ -13,16 +13,14 @@
 </head>
 <body>
 
-  <h1>✋ Finger Counter</h1>
+  <h1>Finger Simon Says</h1>
+
+  <div id="prompt">Press Start</div>
+  <button id="startBtn">Start</button>
 
   <div class="stage">
-    <video id="video" autoplay playsinline></video>
+    <video id="video" playsinline></video>
     <canvas id="canvas"></canvas>
-
-    <div class="overlay">
-      <div id="number">–</div>
-      <div id="status">Starting camera…</div>
-    </div>
   </div>
 
   <script src="game.js"></script>
