@@ -8,11 +8,14 @@ const startBtn = document.getElementById("startBtn");
 let round = 0;
 let target = 0;
 let simonSays = true;
+
 let roundStart = 0;
 let holdStart = null;
 
 let responseTime = 2000;
 const holdTime = 600;
+const graceTime = 1500;
+
 let gameActive = false;
 
 // Resize canvas
@@ -36,7 +39,7 @@ function countFingers(lm) {
     if (lm[tip].y < lm[joint].y) count++;
   }
 
-  // thumb
+  // Thumb
   if (lm[4].x > lm[3].x) count++;
 
   return count;
@@ -66,7 +69,7 @@ function endGame(reason) {
 // Next round
 function nextRound() {
   gameActive = false;
-  responseTime = Math.max(800, responseTime - 100);
+  responseTime = Math.max(900, responseTime - 100);
   promptEl.textContent = "Correct!";
   setTimeout(startRound, 800);
 }
@@ -77,6 +80,10 @@ function checkInput(fingers) {
 
   const now = Date.now();
 
+  // Grace period so player can move hand
+  if (now - roundStart < graceTime) return;
+
+  // Simon did NOT say
   if (!simonSays) {
     if (fingers === target) {
       endGame("Simon didn't say");
@@ -84,6 +91,7 @@ function checkInput(fingers) {
     return;
   }
 
+  // Simon DID say
   if (fingers === target) {
     if (!holdStart) holdStart = now;
     if (now - holdStart >= holdTime) {
@@ -91,7 +99,7 @@ function checkInput(fingers) {
     }
   } else {
     holdStart = null;
-    if (now - roundStart > responseTime) {
+    if (now - roundStart > responseTime + graceTime) {
       endGame("Too slow");
     }
   }
